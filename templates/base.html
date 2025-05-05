@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>𝔇𝔄𝔗 ℭ𝔬𝔪𝔭𝔞𝔫𝔶 | 𝔈𝔩𝔢𝔠𝔱𝔯𝔬𝔫𝔦𝔠𝔰 𝔖𝔱𝔬𝔯𝔢</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Главная</a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i> Корзина</a>
+            <a href="{{ url_for('order_history') }}"><i class="fas fa-history"></i> Заказы</a>
+            <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Выход</a>
+        {% else %}
+            <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Вход</a>
+            <a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Регистрация</a>
+        {% endif %}
+    </nav>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="product-details">
+        <img src="{{ url_for('static', filename=product.image) }}"
+             alt="{{ product.name }}"
+             class="product-image">
+        <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            <p class="description">{{ product.description }}</p>
+            <p class="price">${{ "%.2f"|format(product.price) }}</p>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('add_to_cart', id=product.id) }}"
+                   class="btn btn-primary">
+                    Добавить в корзину
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Пожалуйста, войдите, чтобы добавить в корзину.</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

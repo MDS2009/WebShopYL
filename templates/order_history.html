@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>История заказов</h1>
+    {% if orders %}
+        <div class="orders">
+            {% for order in orders %}
+                <div class="order">
+                    <p>Заказ #{{ order.id }} - Итого: ${{ "%.2f"|format(order.total) }}</p>
+                    <p>Статус: {{ order.status }}</p>
+                    <p>Дата: {{ order.created_at }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Заказов еще не было.</p>
+    {% endif %}
+{% endblock %}

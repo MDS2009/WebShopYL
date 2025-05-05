@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Подтверждение платежа</h1>
+    <div class="payment-warning">
+        <h3>Подтвердите платеж.</h3>  <!-- Добавлено сообщение -->
+        <p>Итого: ${{ order.total }}</p>
+        <a href="{{ url_for('confirm_payment', order_id=order.id) }}" 
+           class="btn btn-danger">
+            Да, я уверен!
+        </a>
+        <a href="{{ url_for('cart') }}" class="btn btn-secondary">
+            Передумал
+        </a>
+    </div>
+{% endblock %}

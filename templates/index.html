@@ -1,0 +1,44 @@
+<!-- index.html -->
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        <h1 class="main-title">🔥 Новинки электроники</h1>
+        <div class="products-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <div class="card-header">
+                        <img src="{{ url_for('static', filename=product.image) }}"
+                             alt="{{ product.name }}"
+                             class="product-image">
+                        <div class="product-badge">Топ продаж 🔥</div>
+                    </div>
+
+                    <div class="card-body">
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-description">{{ product.description }}</p>
+
+                        <div class="card-footer">
+                            <div class="price-block">
+                                <span class="price">${{ product.price }}</span>
+                            </div>
+
+                            <div class="product-actions">
+                                <!-- Исправленная кнопка "Подробнее" -->
+                                <button class="btn btn-details"
+                                        onclick="window.location='{{ url_for('product', id=product.id) }}'">
+                                    <i class="fas fa-info-circle"></i>ㅤПодробнее
+                                </button>
+
+                                <!-- Исправленная кнопка "В корзину" -->
+                                <button class="btn btn-cart"
+                                        onclick="window.location='{{ url_for('add_to_cart', id=product.id) }}'">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

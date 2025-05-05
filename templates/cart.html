@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container cart-container">
+        <h1 class="page-title">🛒 Ваша корзина</h1>
+        {% if products %}
+            <div class="cart-items">
+                {% for product in products %}
+                    <div class="cart-item">
+                        <div class="cart-item-image-wrapper">
+                            <img src="{{ url_for('static', filename=product.image) }}"
+                                 alt="{{ product.name }}"
+                                 class="cart-item-image">
+                        </div>
+
+                        <div class="cart-item-content">
+                            <h3 class="product-title">{{ product.name }}</h3>
+
+                            <div class="cart-item-controls">
+                                <div class="quantity-control">
+                                    <button class="btn-quantity minus" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number"
+                                           value="{{ cart_items[product.id|string] }}"
+                                           min="1"
+                                           class="quantity-input"
+                                           data-product-id="{{ product.id }}">
+                                    <button class="btn-quantity plus" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+
+
+                                <div class="price-wrapper">
+                                    <span class="price">${{ "%.2f"|format(product.price * cart_items[product.id|string]) }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cart-item-actions">
+                            <form action="{{ url_for('remove_from_cart', id=product.id) }}" method="POST">
+                                <button type="submit" class="btn btn-danger btn-icon">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-footer">
+                <div class="total-summary">
+                    <h3 class="total-label">Общая сумма:</h3>
+                    <div class="total-price">${{ "%.2f"|format(total) }}</div>
+                </div>
+
+                <div class="checkout-actions">
+                    <form action="{{ url_for('clear_cart') }}" method="POST">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-broom"></i> Очистить корзину
+                        </button>
+                    </form>
+
+                    <a href="{{ url_for('checkout') }}" class="btn btn-success">
+                        <i class="fas fa-credit-card"></i> Оплатить заказ
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart fa-4x"></i>
+                <h2>Ваша корзина пуста</h2>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Вернуться в магазин
+                </a>
+            </div>
+        {% endif %}
+    </div>
+<script>
+document.querySelectorAll('.btn-quantity').forEach(button => {
+    button.addEventListener('click', async (e) => {
+        // Исправлено: правильное определение кнопки
+        const isPlus = e.currentTarget.classList.contains('plus');
+        const input = e.currentTarget.closest('.quantity-control').querySelector('.quantity-input');
+        const productId = input.dataset.productId;
+        let quantity = parseInt(input.value);
+
+        // Изменяем количество
+        quantity = isPlus ? quantity + 1 : Math.max(1, quantity - 1);
+
+        try {
+            const response = await fetch(`/update_quantity/${productId}/${quantity}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Обновляем данные
+            input.value = data.new_quantity;
+            document.querySelector('.total-price').textContent = `$${data.total.toFixed(2)}`;
+
+        } catch (error) {
+            console.error('Ошибка обновления:', error);
+            alert('Ошибка при обновлении количества. Перезагрузите страницу.');
+        }
+    });
+});
+</script>
+{% endblock %}

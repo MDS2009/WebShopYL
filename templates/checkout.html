@@ -1,0 +1,66 @@
+<!-- checkout.html -->
+{% extends "base.html" %}
+{% block content %}
+    <div class="checkout-container">
+        <h1 class="page-title animate__animated animate__fadeInDown">Оформление заказа</h1>
+        <div class="checkout-wrapper">
+            <div class="order-summary">
+                <h2><i class="fas fa-box-open"></i> Состав заказа</h2>
+                <ul class="checkout-list">
+                    {% for product in products %}
+                        <li class="checkout-item animate__animated animate__fadeIn">
+                            <span class="product-name">{{ product.name }}</span>
+                            <span class="product-price">${{ "%.2f"|format(product.price) }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="total-summary">
+                    <h3>Общая сумма:</h3>
+                    <div class="total-amount">${{ "%.2f"|format(total) }}</div>
+                </div>
+            </div>
+
+            <form method="POST" class="checkout-form animate__animated animate__fadeIn">
+                <div class="form-section">
+                    <h3><i class="fas fa-truck"></i> Данные доставки</h3>
+                    <div class="form-group">
+                        <label for="address"><i class="fas fa-map-marker-alt"></i> Адрес доставки:</label>
+                        <textarea class="form-control"
+                                  name="address"
+                                  required
+                                  placeholder="Введите полный адрес доставки"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-credit-card"></i> Способ оплаты</h3>
+                    <div class="payment-methods">
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="card" checked>
+                            <div class="payment-card">
+                                <i class="fab fa-cc-visa"></i>
+                                <span>Кредитная карта</span>
+                            </div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="cash">
+                            <div class="payment-card">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Наличными курьеру</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-confirm">
+                        <i class="fas fa-check-circle"></i> Подтвердить заказ
+                    </button>
+                    <a href="{{ url_for('cart') }}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Вернуться в корзину
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
