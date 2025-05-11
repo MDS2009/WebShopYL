@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>𝔇𝔄𝔗 ℭ𝔬𝔪𝔭𝔞𝔫𝔶 | Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <nav class="admin-nav">
+        <a href="{{ url_for('admin_products') }}"><i class="fas fa-box-open"></i> Товары</a> <!-- Исправлен URL -->
+        <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Вернуться в магазин</a>
+    </nav>
+    <div class="admin-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

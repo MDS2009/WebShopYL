@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        <h1>❤️ Избранное</h1>
+        {% if products %}
+            <div class="products-grid">
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="card-header">
+                            <img src="{{ url_for('static', filename=product.image) }}" 
+                                 alt="{{ product.name }}" 
+                                 class="product-image">
+                        </div>
+                        <div class="card-body">
+                            <h3>{{ product.name }}</h3>
+                            <p class="price">${{ product.price }}</p>
+                            <div class="product-actions">
+                                <a href="{{ url_for('product', id=product.id) }}" 
+                                   class="btn btn-details">
+                                    Подробнее
+                                </a>
+                                <form action="{{ url_for('remove_from_favourite', product_id=product.id) }}" 
+                                      method="POST">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-favourites">
+                <i class="fas fa-heart-broken fa-3x"></i>
+                <p>В избранном пока ничего нет.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

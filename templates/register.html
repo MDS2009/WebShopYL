@@ -1,37 +1,113 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Регистрация</h1>
-    <form method="POST" action="{{ url_for('register') }}">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.username.label }}
-            {{ form.username(class="form-control") }}
-            {% for error in form.username.errors %}
-                <span class="text-danger">{{ error }}</span>
-            {% endfor %}
+    <div class="auth-container">
+        <h1><i class="fas fa-user-plus"></i> Регистрация</h1>
+        <form method="POST" id="registrationForm">
+            {{ form.hidden_tag() }}
+
+            <!-- Выбор типа аккаунта -->
+            <div class="form-group">
+                <label>Тип аккаунта:</label>
+                <div class="account-type">
+                    <label class="radio-label">
+                        <input type="radio" name="account_type" value="user" checked>
+                        Обычный пользователь
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="account_type" value="seller">
+                        Продавец/Компания
+                    </label>
+                </div>
+            </div>
+
+            <!-- Основные поля -->
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-id-card fa-lg"></i>
+                    {{ form.username.label.text }}
+                </label>
+                {{ form.username(class="form-control", placeholder="Придумайте логин") }}
+            </div>
+
+            <!-- Блок для продавца -->
+            <div id="sellerFields" style="display: none;">
+                <div class="form-group">
+                    <label>Должность:</label>
+                    <input type="text" class="form-control" name="position"
+                           placeholder="Например: менеджер по продажам">
+                </div>
+                <div class="form-group">
+                    <label>Название компании:</label>
+                    <input type="text" class="form-control" name="company"
+                           placeholder="Официальное название организации">
+                </div>
+                <div class="form-group">
+                    <label>Вид продукции:</label>
+                    <textarea class="form-control" name="products_type"
+                              placeholder="Опишите категории товаров, которые вы продаете"></textarea>
+                </div>
+            </div>
+
+            <!-- Общие поля -->
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope fa-lg"></i>
+                    {{ form.email.label.text }}
+                </label>
+                {{ form.email(class="form-control", placeholder="Введите почту") }}
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock fa-lg"></i>
+                    {{ form.password.label.text }}
+                </label>
+                {{ form.password(class="form-control", placeholder="Придумайте пароль") }}
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">
+                    <i class="fas fa-lock fa-lg"></i>
+                    {{ form.confirm_password.label.text }}
+                </label>
+                {{ form.confirm_password(class="form-control", placeholder="Повторите пароль") }}
+            </div>
+
+            <button type="submit" class="btn-auth">
+                <i class="fas fa-user-check"></i> Зарегистрироваться
+            </button>
+        </form>
+
+        <div class="auth-links">
+            <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
         </div>
-        <div class="form-group">
-            {{ form.email.label }}
-            {{ form.email(class="form-control") }}
-            {% for error in form.email.errors %}
-                <span class="text-danger">{{ error }}</span>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.password.label }}
-            {{ form.password(class="form-control") }}
-            {% for error in form.password.errors %}
-                <span class="text-danger">{{ error }}</span>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.confirm_password.label }}
-            {{ form.confirm_password(class="form-control") }}
-            {% for error in form.confirm_password.errors %}
-                <span class="text-danger">{{ error }}</span>
-            {% endfor %}
-        </div>
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
-    <p>У вас уже есть учетная запись? <a href="{{ url_for('login') }}">Войдите в неё</a></p>
+    </div>
+
+    <script>
+        // Показ/скрытие полей для продавца
+        document.querySelectorAll('input[name="account_type"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('sellerFields').style.display =
+                    this.value === 'seller' ? 'block' : 'none';
+            });
+        });
+    </script>
+
+    <style>
+        .account-type {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        #sellerFields {
+            border-left: 3px solid #007bff;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+    </style>
 {% endblock %}

@@ -1,21 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="product-details">
-        <img src="{{ url_for('static', filename=product.image) }}"
-             alt="{{ product.name }}"
-             class="product-image">
-        <div class="product-info">
-            <h1>{{ product.name }}</h1>
-            <p class="description">{{ product.description }}</p>
-            <p class="price">${{ "%.2f"|format(product.price) }}</p>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('add_to_cart', id=product.id) }}"
-                   class="btn btn-primary">
-                    Добавить в корзину
-                </a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Пожалуйста, войдите, чтобы добавить в корзину.</a>
-            {% endif %}
+<div class="product-details">
+    <img src="{{ url_for('static', filename=product.image) }}"
+         alt="{{ product.name }}"
+         class="product-image">
+    <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <p class="description">{{ product.description }}</p>
+        <p class="price">${{ "%.2f"|format(product.price) }}</p>
+
+        {% if current_user.is_authenticated %}
+        <div class="product-actions">
+            <button class="btn btn-primary"
+                    onclick="window.location='{{ url_for('add_to_favourite', product_id=product.id) }}'">
+                <i class="fas fa-heart"></i> В избранное
+            </button>
+            <button class="btn btn-success"
+                    onclick="window.location='{{ url_for('add_to_cart', id=product.id) }}'">
+                <i class="fas fa-cart-plus"></i> В корзину
+            </button>
         </div>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="alert-link">
+            <i class="fas fa-lock"></i> Войдите, чтобы взаимодействовать с товаром
+        </a>
+        {% endif %}
     </div>
+</div>
 {% endblock %}

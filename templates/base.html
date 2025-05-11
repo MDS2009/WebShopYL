@@ -9,6 +9,9 @@
     <nav>
         <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Главная</a>
         {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %} <!-- Добавлена ссылка для админов -->
+                <a href="{{ url_for('admin_products') }}"><i class="fas fa-lock"></i> Админ-панель</a>
+            {% endif %}
             <a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i> Корзина</a>
             <a href="{{ url_for('order_history') }}"><i class="fas fa-history"></i> Заказы</a>
             <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Выход</a>
@@ -16,6 +19,10 @@
             <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Вход</a>
             <a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Регистрация</a>
         {% endif %}
+        <form method="GET" action="{{ url_for('index') }}" class="search-form">
+            <input type="text" name="search" placeholder="Поиск товаров..." value="{{ request.args.get('search', '') }}">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
     </nav>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

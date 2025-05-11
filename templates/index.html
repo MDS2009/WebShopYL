@@ -3,6 +3,17 @@
 {% block content %}
     <div class="container">
         <h1 class="main-title">🔥 Новинки электроники</h1>
+
+        <div class="filters">
+            <input type="number" name="min_price" placeholder="Мин. цена" value="{{ request.args.get('min_price', '') }}">
+            <input type="number" name="max_price" placeholder="Макс. цена" value="{{ request.args.get('max_price', '') }}">
+            <select name="category">
+                <option value="">Все категории</option>
+                <option value="electronics">Электроника</option>
+                <option value="clothes">Одежда</option>
+            </select>
+        </div>
+
         <div class="products-grid">
             {% for product in products %}
                 <div class="product-card">
@@ -23,13 +34,14 @@
                             </div>
 
                             <div class="product-actions">
-                                <!-- Исправленная кнопка "Подробнее" -->
                                 <button class="btn btn-details"
                                         onclick="window.location='{{ url_for('product', id=product.id) }}'">
                                     <i class="fas fa-info-circle"></i>ㅤПодробнее
                                 </button>
-
-                                <!-- Исправленная кнопка "В корзину" -->
+                                <button class="btn btn-favourite"
+                                        onclick="window.location='{{ url_for('add_to_favourite', product_id=product.id) }}'">
+                                    <i class="fas fa-heart"></i>
+                                </button>
                                 <button class="btn btn-cart"
                                         onclick="window.location='{{ url_for('add_to_cart', id=product.id) }}'">
                                     <i class="fas fa-cart-plus"></i>

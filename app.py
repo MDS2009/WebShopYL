@@ -1,12 +1,15 @@
 from flask import Flask, render_template, session, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
+from flask_migrate import Migrate
 from extensions import db, login_manager
-from forms import RegistrationForm, LoginForm, ProductForm, SearchForm
-from models import User, Product, OrderItem, Order
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
+
+from forms import RegistrationForm, LoginForm, ProductForm, SearchForm
+from models import User, Product, OrderItem, Order, Favourite
+
 
 def create_app():
     app = Flask(__name__)
@@ -16,6 +19,7 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
+    Migrate(app, db)
 
     with app.app_context():
         db.create_all()
@@ -29,27 +33,180 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 #Начальная страница
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    form = SearchForm()
-    products = Product.query
+    search_query = request.args.get('search', '')
+    min_price = request.args.get('min_price')
+    max_price = request.args.get('max_price')
+    category = request.args.get('category')
 
-    # Использование request.args для GET-параметров
-    if request.args.get('search'):
-        products = products.filter(Product.name.ilike(f"%{request.args.get('search')}%"))
-    if request.args.get('min_price'):
-        products = products.filter(Product.price >= float(request.args.get('min_price')))
-    if request.args.get('max_price'):
-        products = products.filter(Product.price <= float(request.args.get('max_price')))
+    query = Product.query
 
-    products = products.all()
-    return render_template('index.html', products=products, form=form)
+    if search_query:
+        query = query.filter(Product.name.ilike(f'%{search_query}%'))
+    if min_price:
+        query = query.filter(Product.price >= float(min_price))
+    if max_price:
+        query = query.filter(Product.price <= float(max_price))
+    if category:
+        query = query.filter_by(category=category)
 
+    products = query.all()
+    return render_template('index.html', products=products)
 #Товары
 @app.route('/product/<int:id>')
 def product(id):
     product = Product.query.get_or_404(id)
     return render_template('product.html', product=product)
+
+@app.route('/favourite/<int:product_id>', methods=['POST'])
+@login_required
+def add_to_favourite(product_id):
+    favourite = Favourite(user_id=current_user.id, product_id=product_id)
+    db.session.add(favourite)
+    db.session.commit()
+    return redirect(url_for('product', id=product_id))
+
+@app.route('/favourites')
+@login_required
+def favourites():
+    favourites = Favourite.query.filter_by(user_id=current_user.id).all()
+    products = [Product.query.get(fav.product_id) for fav in favourites]
+    return render_template('favourites.html', products=products)
+
+# Админ-панель
+@app.route('/admin/products')
+@login_required
+def admin_products():
+    if not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('index'))
+
+    products = Product.query.order_by(Product.id.desc()).all()
+    return render_template('admin/products.html', products=products)
+
+
+@app.route('/admin/products/add', methods=['GET', 'POST'])
+@login_required
+def admin_add_product():
+    if not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('index'))
+
+    form = ProductForm()
+    if form.validate_on_submit():
+        try:
+            image = form.image.data
+            filename = secure_filename(image.filename)
+            upload_dir = os.path.join(app.root_path, 'static/uploads')
+            os.makedirs(upload_dir, exist_ok=True)
+            image.save(os.path.join(upload_dir, filename))
+
+            product = Product(
+                name=form.name.data,
+                description=form.description.data,
+                price=form.price.data,
+                image=f'uploads/{filename}'
+            )
+            db.session.add(product)
+            db.session.commit()
+            flash('Товар успешно добавлен', 'success')
+            return redirect(url_for('admin_products'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ошибка: {str(e)}', 'danger')
+    return render_template('admin/add_product.html', form=form)
+
+
+@app.route('/admin/products/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_product(id):
+    if not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('index'))
+
+    product = Product.query.get_or_404(id)
+    form = ProductForm(obj=product)
+    form.image.validators = []  # Убираем обязательность изображения
+
+    if form.validate_on_submit():
+        try:
+            product.name = form.name.data
+            product.description = form.description.data
+            product.price = form.price.data
+
+            if form.image.data:
+                image = form.image.data
+                filename = secure_filename(image.filename)
+                upload_dir = os.path.join(app.root_path, 'static/uploads')
+                image.save(os.path.join(upload_dir, filename))
+                product.image = f'uploads/{filename}'
+            else:
+                product.image = product.image  # Сохраняем старое изображение
+
+            db.session.commit()
+            flash('Товар обновлен', 'success')
+            return redirect(url_for('admin_products'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ошибка: {str(e)}', 'danger')
+    return render_template('admin/edit_product.html', form=form, product=product)
+
+
+@app.route('/admin/products/delete/<int:id>', methods=['POST'])
+@login_required
+def admin_delete_product(id):
+    if not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('index'))
+
+    product = Product.query.get_or_404(id)
+    try:
+        db.session.delete(product)
+        db.session.commit()
+        flash('Товар удален', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка удаления: {str(e)}', 'danger')
+    return redirect(url_for('admin_products'))
+
+
+# Маршрут для админа
+@app.route('/admin/approve_sellers')
+@login_required
+def approve_sellers():
+    if not current_user.is_admin:
+        abort(403)
+
+    pending_sellers = User.query.filter_by(
+        account_type='seller',
+        is_approved=False
+    ).all()
+
+    return render_template('admin/approve_sellers.html',
+                           sellers=pending_sellers)
+
+
+# Одобрение продавца
+@app.route('/admin/approve/<int:user_id>')
+@login_required
+def approve_seller(user_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    user = User.query.get_or_404(user_id)
+    user.is_approved = True
+    db.session.commit()
+
+    send_verification_code(user)  # Отправка кода продавцу
+    flash('Продавец одобрен! Код отправлен.', 'success')
+    return redirect(url_for('approve_sellers'))
+
+
+# Генерация и отправка кода
+def send_verification_code(user):
+    # Реализация отправки email/SMS с кодом
+    print(f'Код подтверждения для {user.email}: {user.verification_code}')
 
 #Добавление в корзину и корзина
 @app.route('/add_to_cart/<int:id>')
@@ -115,7 +272,6 @@ def clear_cart():
         flash('Корзина успешно очищена', 'success')
     return redirect(url_for('cart'))
 
-# app.py - исправленный маршрут remove_from_cart
 @app.route('/remove_from_cart/<int:id>', methods=['POST'])  # Изменено на POST
 @login_required
 def remove_from_cart(id):
@@ -147,21 +303,35 @@ def register():
             flash('Ошибка регистрации. Адрес электронной почты или логин уже существуют.', 'danger')
     return render_template('register.html', form=form)
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        # Ищем пользователя по email или username
         user = User.query.filter(
             (User.email == form.identifier.data) |
             (User.username == form.identifier.data)
         ).first()
 
+        # Проверка для продавцов
+        if user and user.account_type == 'seller':
+            if not user.is_approved:
+                flash('Аккаунт продавца еще не одобрен', 'danger')
+                return redirect(url_for('login'))
+
+            if not user.code_used and \
+                    request.form.get('verification_code') != user.verification_code:
+                flash('Неверный код подтверждения', 'danger')
+                return redirect(url_for('login'))
+
+            user.code_used = True  # Код можно использовать только один раз
+            db.session.commit()
+
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
-            flash('Вход в систему прошел успешно!', 'success')
             return redirect(url_for('index'))
-        flash('Неверный адрес электронной почты, логин или пароль', 'danger')
+
+        flash('Неверные данные', 'danger')
     return render_template('login.html', form=form)
 
 @app.route('/logout')
@@ -171,6 +341,16 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/check_account_type')
+def check_account_type():
+    login = request.args.get('login')
+    user = User.query.filter(
+        (User.email == login) | (User.username == login)
+    ).first()
+
+    return jsonify({
+        'is_seller': user and user.account_type == 'seller' and user.is_approved
+    })
 
 
 #Оплата
@@ -248,30 +428,6 @@ def checkout():
 def order_history():
     orders = Order.query.filter_by(user_id=current_user.id).all()
     return render_template('order_history.html', orders=orders)
-
-#Админ панель и функции
-@app.route('/add_product', methods=['GET', 'POST'])
-@login_required
-def add_product():
-    form = ProductForm()
-    if form.validate_on_submit():
-        try:
-            filename = secure_filename(form.image.data.filename)
-            file_path = os.path.join(app.root_path, 'static/uploads', filename)
-            form.image.data.save(file_path)
-
-            product = Product(
-                name=form.name.data,
-                description=form.description.data,
-                price=float(form.price.data),
-                image=f'uploads/{filename}'
-            )
-            db.session.add(product)
-            db.session.commit()
-            return redirect(url_for('index'))
-        except Exception as e:
-            flash('Ошибка при создании продукта', 'danger')
-    return render_template('add_product.html', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)

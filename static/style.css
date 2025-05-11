@@ -1,4 +1,4 @@
-/* Обновленная цветовая схема */
+/* ==================== Переменные ==================== */
 :root {
     --primary: #42314b;
     --secondary: #00fcfc;
@@ -6,12 +6,13 @@
     --dark: #1b2632;
 }
 
+/* ==================== Общие стили ==================== */
 body {
     background: linear-gradient(45deg, #f8f9fa, #e9ecef);
     font-family: 'Segoe UI', system-ui, -apple-system;
 }
 
-/* Навигация */
+/* ==================== Навигация ==================== */
 nav {
     background: var(--dark);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -54,7 +55,37 @@ nav a:hover::after {
     left: 0;
 }
 
-/* Сетка товаров */
+/* ==================== Формы ==================== */
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    margin-bottom: 1.5rem;
+}
+
+.form-group i {
+    font-size: 1.4em;
+    vertical-align: middle;
+}
+
+.form-group label {
+    min-width: 125px;
+    text-align: right;
+    display: block;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.form-control {
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 300px;
+}
+
+/* ==================== Сетка товаров ==================== */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -75,7 +106,6 @@ nav a:hover::after {
     transform: translateY(-5px);
 }
 
-/* Заголовок карточки */
 .card-header {
     position: relative;
     height: 200px;
@@ -94,21 +124,21 @@ nav a:hover::after {
     transform: scale(1.05);
 }
 
-/* Бейдж */
+/* ==================== Элементы товаров ==================== */
 .product-badge {
     position: absolute;
     top: 15px;
     right: 15px;
     background: #ff4757;
-    color: white;
+    color: #fff;
     padding: 5px 15px;
     border-radius: 20px;
     font-size: 0.9em;
     box-shadow: 0 3px 6px rgba(0,0,0,0.16);
 }
 
-/* Тело карточки */
-.card-body {
+.card-body,
+.card-footer {
     padding: 15px;
 }
 
@@ -124,12 +154,13 @@ nav a:hover::after {
     line-height: 1.4;
 }
 
-/* Подвал карточки */
-.card-footer {
-    padding: 15px;
-    margin-top: auto;
+.product-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
 }
 
+/* ==================== Цены ==================== */
 .price-block {
     display: flex;
     align-items: center;
@@ -149,13 +180,68 @@ nav a:hover::after {
     font-size: 0.9em;
 }
 
-/* Кнопки */
-.product-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+/* ==================== Авторизация ==================== */
+.auth-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
+.auth-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--dark);
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.auth-container h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--primary);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.auth-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.auth-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+}
+
+.auth-links a:hover {
+    color: var(--accent);
+}
+
+.auth-links a:hover::after {
+    width: 100%;
+}
+
+/* ==================== Кнопки ==================== */
 .btn {
     border-radius: 8px;
     font-weight: 600;
@@ -168,32 +254,9 @@ nav a:hover::after {
 
 .btn-details {
     background: var(--primary);
-    color: white;
+    color: #fff;
     padding: 12px 20px;
     flex-grow: 1;
-}
-
-/* Добавьте в style.css */
-.btn-quantity {
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.btn-danger {
-    transition: transform 0.2s;
-}
-
-.btn-danger:hover {
-    transform: scale(1.1);
-}
-
-.quantity-input {
-    transition: border-color 0.3s;
-}
-
-.quantity-input:focus {
-    border-color: #6c5ce7;
-    outline: none;
 }
 
 .btn-details:hover {
@@ -213,55 +276,221 @@ nav a:hover::after {
     transform: rotate(15deg) scale(1.1);
 }
 
+.btn-auth {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(45deg, var(--primary), #5a4b69);
+    color: #fff !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-auth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108,92,231,0.4);
+}
+
+.btn-auth i {
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+}
+
+.btn-auth:hover i {
+    transform: scale(1.1);
+}
+
+/* ==================== Новые стили ==================== */
+
+/* Выбор типа аккаунта */
+.account-type {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.radio-label:hover {
+    background: var(--primary);
+    color: white;
+}
+
+input[type="radio"] {
+    width: 1.2em;
+    height: 1.2em;
+    accent-color: var(--accent);
+}
+
+/* Поля для продавца */
+#sellerFields {
+    border-left: 3px solid var(--accent);
+    padding: 1rem 0 1rem 1.5rem;
+    margin: 2rem 0;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Код подтверждения */
+#sellerCodeField {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px dashed var(--primary);
+}
+
+.verification-code-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--dark);
+    margin-bottom: 0.8rem;
+}
+
+/* Админ-панель */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.admin-table th {
+    background: var(--primary);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.btn-approve {
+    background: #28a745;
+    padding: 0.5rem 1rem;
+    color: white !important;
+    transition: transform 0.2s;
+}
+
+.btn-approve:hover {
+    transform: scale(1.05);
+    background: #218838;
+}
+
+/* Стили для избранного */
+.btn-favourite {
+    background: #ff4757;
+    color: white;
+    margin-left: 10px;
+}
+
+.btn-favourite:hover {
+    background: #ff6b81;
+}
+
+.empty-favourites {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.empty-favourites i {
+    margin-bottom: 1rem;
+}
+
+.alert-link {
+    color: var(--primary);
+    text-decoration: none;
+    border: 2px solid var(--primary);
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/* Модальное окно */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+}
+
+/* Прогресс-бар */
+.progress-bar {
+    height: 8px;
+    background: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--secondary);
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+
 /* Анимации */
-.total-price {
-    transition: all 0.3s ease;
-}
-
-@keyframes shine {
-    100% {
-        left: 200%;
-    }
-}
-
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 
-.product-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,0.3) 100%
-    );
-    transform: skewX(-45deg);
+.pending-approval {
+    animation: pulse 2s infinite;
+    border-left: 4px solid var(--accent);
 }
 
-.product-card:hover::before {
-    animation: shine 1.5s;
-}
-
-/* Адаптивность */
+/* ==================== Адаптивность ==================== */
 @media (max-width: 768px) {
     .products-grid {
         grid-template-columns: 1fr;
         padding: 10px;
     }
 
-    .product-card {
-        margin-bottom: 15px;
+    .product-card,
+    .auth-container {
+        margin: 1rem;
+        padding: 1.5rem;
     }
 
-    nav a {
-        margin: 5px;
+    nav a,
+    .btn-auth {
         padding: 8px 15px;
         font-size: 14px;
     }
@@ -269,9 +498,42 @@ nav a:hover::after {
     .product-name {
         font-size: 1.1em;
     }
+
+    .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .form-group label {
+        text-align: left;
+        min-width: auto;
+    }
+
+    .account-type {
+        flex-direction: column;
+    }
+
+    .radio-label {
+        justify-content: center;
+    }
+
+    #sellerFields {
+        padding-left: 1rem;
+        margin-left: 0;
+        border-left: none;
+        border-top: 3px solid var(--accent);
+        padding-top: 1rem;
+    }
+
+    .admin-table td,
+    .admin-table th {
+        padding: 0.8rem;
+        font-size: 0.9em;
+    }
 }
 
-/* Уведомления */
+/* ==================== Уведомления ==================== */
 .alert {
     border-radius: 10px;
     border: none;
