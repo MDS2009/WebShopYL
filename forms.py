@@ -98,16 +98,10 @@ class SearchForm(FlaskForm):
     min_price = StringField('Минимальная цена')
     max_price = StringField('Максимальная цена')
     category = SelectField('Категория', choices=[
-        ('all', 'Все категории'),
-        ('cat', 'Кошки'),
-        ('dog', 'Собаки'),
-        ('bird', 'Птицы')
+        ('all', 'Все категории')
     ])
     brand = SelectField('Бренд', choices=[
-        ('all', 'Все бренды'),
-        ('purina', 'Purina'),
-        ('royal', 'Royal Canin'),
-        ('pedigree', 'Pedigree')
+        ('all', 'Все бренды')
     ])
     sort_by = SelectField('Сортировка', choices=[
         ('name_asc', 'По названию (А-Я)'),
