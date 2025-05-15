@@ -77,7 +77,7 @@ def index():
         elif sort_by == 'price_desc':
             query = query.order_by(Product.price.desc())
 
-        # Сохраняем параметры в форме для отображения
+        #Параметры в форме для отображения
         if not form.search.data and search_term:
             form.search.data = search_term
         if not form.min_price.data and min_price:
@@ -187,7 +187,7 @@ def admin_edit_product(id):
                 image.save(os.path.join(upload_dir, filename))
                 product.image = f'uploads/{filename}'
             else:
-                product.image = product.image  # Сохраняем старое изображение
+                product.image = product.image
 
             db.session.commit()
             flash('Товар обновлен', 'success')
@@ -277,7 +277,7 @@ def cart():
     total = sum(product.price * cart_items[str(product.id)] for product in products)
     return render_template('cart.html',
                            products=products,
-                           cart_items=cart_items,  # Добавьте это
+                           cart_items=cart_items,
                            total=total)
 
 
@@ -307,7 +307,7 @@ def update_quantity(id, quantity):
         'total': total
     })
 
-@app.route('/clear_cart', methods=['POST'])  # Используем POST для безопасности
+@app.route('/clear_cart', methods=['POST'])
 @login_required
 def clear_cart():
     if 'cart' in session:
@@ -316,11 +316,11 @@ def clear_cart():
         flash('Корзина успешно очищена', 'success')
     return redirect(url_for('cart'))
 
-@app.route('/remove_from_cart/<int:id>', methods=['POST'])  # Изменено на POST
+@app.route('/remove_from_cart/<int:id>', methods=['POST'])
 @login_required
 def remove_from_cart(id):
     if 'cart' in session and str(id) in session['cart']:
-        del session['cart'][str(id)]  # Исправлено для работы со словарем
+        del session['cart'][str(id)]
         session.modified = True
         flash('Товар удален из корзины', 'success')
     return redirect(url_for('cart'))
@@ -368,7 +368,7 @@ def login():
                 flash('Неверный код подтверждения', 'danger')
                 return redirect(url_for('login'))
 
-            user.code_used = True  # Код можно использовать только один раз
+            user.code_used = True
             db.session.commit()
 
         if user and check_password_hash(user.password, form.password.data):
