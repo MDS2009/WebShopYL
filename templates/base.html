@@ -14,15 +14,13 @@
             {% endif %}
             <a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i> Корзина</a>
             <a href="{{ url_for('order_history') }}"><i class="fas fa-history"></i> Заказы</a>
+            <a href="{{ url_for('profile') }}" class="profile-btn"><i class="fas fa-user-circle"></i> Профиль</a>
             <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Выход</a>
         {% else %}
             <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Вход</a>
             <a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Регистрация</a>
         {% endif %}
-        <form method="GET" action="{{ url_for('index') }}" class="search-form">
-            <input type="text" name="search" placeholder="Поиск товаров..." value="{{ request.args.get('search', '') }}">
-            <button type="submit"><i class="fas fa-search"></i></button>
-        </form>
+
     </nav>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

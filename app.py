@@ -6,14 +6,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-
-from forms import RegistrationForm, LoginForm, ProductForm, SearchForm
+from forms import RegistrationForm, LoginForm, ProductForm, SearchForm, RequestResetForm, ResetPasswordForm, ChangePasswordForm
 from models import User, Product, OrderItem, Order, Favourite
 
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['SECRET_KEY'] = 'your-secret-key'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///store.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -33,26 +32,72 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 #Начальная страница
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    search_query = request.args.get('search', '')
-    min_price = request.args.get('min_price')
-    max_price = request.args.get('max_price')
-    category = request.args.get('category')
+    form = SearchForm()
+    page = request.args.get('page', 1, type=int)
+    per_page = 8
 
+    # Базовый запрос
     query = Product.query
 
-    if search_query:
-        query = query.filter(Product.name.ilike(f'%{search_query}%'))
-    if min_price:
-        query = query.filter(Product.price >= float(min_price))
-    if max_price:
-        query = query.filter(Product.price <= float(max_price))
-    if category:
-        query = query.filter_by(category=category)
+    # Поиск и фильтрация
+    if form.validate_on_submit() or request.args.get('search'):
+        # Поиск по названию
+        search_term = form.search.data or request.args.get('search')
+        if search_term:
+            search = f"%{search_term}%"
+            query = query.filter(Product.name.ilike(search) | Product.description.ilike(search))
 
-    products = query.all()
-    return render_template('index.html', products=products)
+        # Фильтрация по цене
+        min_price = form.min_price.data or request.args.get('min_price')
+        if min_price:
+            try:
+                min_price = float(min_price)
+                query = query.filter(Product.price >= min_price)
+            except ValueError:
+                flash('Неверный формат минимальной цены', 'danger')
+
+        max_price = form.max_price.data or request.args.get('max_price')
+        if max_price:
+            try:
+                max_price = float(max_price)
+                query = query.filter(Product.price <= max_price)
+            except ValueError:
+                flash('Неверный формат максимальной цены', 'danger')
+
+        # Сортировка
+        sort_by = form.sort_by.data or request.args.get('sort_by', 'name_asc')
+        if sort_by == 'name_asc':
+            query = query.order_by(Product.name.asc())
+        elif sort_by == 'name_desc':
+            query = query.order_by(Product.name.desc())
+        elif sort_by == 'price_asc':
+            query = query.order_by(Product.price.asc())
+        elif sort_by == 'price_desc':
+            query = query.order_by(Product.price.desc())
+
+        # Сохраняем параметры в форме для отображения
+        if not form.search.data and search_term:
+            form.search.data = search_term
+        if not form.min_price.data and min_price:
+            form.min_price.data = min_price
+        if not form.max_price.data and max_price:
+            form.max_price.data = max_price
+        if not form.sort_by.data and sort_by:
+            form.sort_by.data = sort_by
+            
+    products = query.paginate(page=page, per_page=per_page, error_out=False)
+    def url_for_page(page):
+        args = request.args.copy()
+        args['page'] = page
+        return url_for('index', **args)
+
+    return render_template('index.html', 
+                           products=products, 
+                           form=form, 
+                           url_for_page=url_for_page)
+
 #Товары
 @app.route('/product/<int:id>')
 def product(id):
@@ -83,7 +128,7 @@ def admin_products():
         return redirect(url_for('index'))
 
     products = Product.query.order_by(Product.id.desc()).all()
-    return render_template('admin/products.html', products=products)
+    return render_template('admin/base_admin.html', products=products)
 
 
 @app.route('/admin/products/add', methods=['GET', 'POST'])
@@ -352,6 +397,41 @@ def check_account_type():
         'is_seller': user and user.account_type == 'seller' and user.is_approved
     })
 
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    from models import UserProfile  # Импортируем модель
+    from forms import ProfileForm  # Импортируем форму
+
+    # Получаем профиль пользователя или создаем новый
+    profile = UserProfile.query.filter_by(user_id=current_user.id).first()
+    if not profile:
+        profile = UserProfile(user_id=current_user.id)
+        db.session.add(profile)
+        db.session.commit()
+
+    form = ProfileForm(obj=profile)
+    if form.validate_on_submit():
+        form.populate_obj(profile)
+        db.session.commit()
+        flash('Профиль обновлен', 'success')
+        return redirect(url_for('profile'))
+    return render_template('profile.html', form=form)
+    
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if not check_password_hash(current_user.password, form.old_password.data):
+            flash('Старый пароль неверный.', 'danger')
+        else:
+            current_user.password = generate_password_hash(form.new_password.data)
+            db.session.commit()
+            flash('Пароль успешно изменён!', 'success')
+            return redirect(url_for('profile'))
+    return render_template('change_password.html', form=form)
+
 
 #Оплата
 @app.route('/payment/<int:order_id>')
@@ -428,6 +508,40 @@ def checkout():
 def order_history():
     orders = Order.query.filter_by(user_id=current_user.id).all()
     return render_template('order_history.html', orders=orders)
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            # Сразу переходим к форме сброса пароля
+            session['reset_email'] = user.email  # Сохраняем email в сессии
+            return redirect(url_for('reset_password'))
+        else:
+            flash('Пользователь с таким email не найден', 'danger')
+    return render_template('reset_request.html', title='Сброс пароля', form=form)
+
+@app.route("/reset_password/new", methods=['GET', 'POST'])
+def reset_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if 'reset_email' not in session:
+        return redirect(url_for('reset_request'))
+    
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=session['reset_email']).first()
+        if user:
+            hashed_password = generate_password_hash(form.password.data)
+            user.password = hashed_password
+            db.session.commit()
+            session.pop('reset_email', None)  # Удаляем email из сессии
+            flash('Ваш пароль был обновлен! Вы можете войти в систему.', 'success')
+            return redirect(url_for('login'))
+    return render_template('reset_token.html', title='Сброс пароля', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)

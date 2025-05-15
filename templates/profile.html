@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="profile-container">
+  <div class="profile-card">
+    <div class="profile-avatar">
+      <i class="fas fa-user-circle"></i>
+    </div>
+    <h2 class="profile-title">Профиль пользователя</h2>
+    <form method="POST" class="profile-form">
+      {{ form.hidden_tag() }}
+      <div class="form-group profile-row">
+        <label class="form-label profile-label">{{ form.full_name.label.text }}</label>
+        {{ form.full_name(class="form-control profile-input", placeholder="Ваше имя") }}
+      </div>
+      <div class="form-group profile-row">
+        <label class="form-label profile-label">{{ form.address.label.text }}</label>
+        {{ form.address(class="form-control profile-input", placeholder="Адрес") }}
+      </div>
+      <div class="form-group profile-row">
+        <label class="form-label profile-label">{{ form.phone.label.text }}</label>
+        {{ form.phone(class="form-control profile-input", placeholder="Телефон") }}
+      </div>
+      <div class="profile-actions">
+        <button type="submit" class="btn btn-profile-secondary">
+            <i class="fas fa-save"></i> Сохранить
+        </button>
+        <a href="{{ url_for('change_password') }}" class="btn btn-profile-secondary">
+            <i class="fas fa-lock"></i> Сменить пароль
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

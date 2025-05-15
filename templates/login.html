@@ -19,7 +19,6 @@
                 {{ form.password(class="form-control", placeholder="Пароль") }}
             </div>
 
-            <!-- Поле для кода подтверждения -->
             <div id="sellerCodeField" style="display: none;">
                 <div class="form-group">
                     <label for="verification_code">
@@ -35,10 +34,13 @@
             <button type="submit" class="btn-auth">
                 <i class="fas fa-unlock-alt"></i> Войти
             </button>
+            <a href="{{ url_for('reset_request') }}" class="text-muted">
+                <i class="fas fa-key"></i> Забыли пароль?
+            </a>
+
         </form>
 
         <script>
-            // Показ поля кода для продавцов
             document.getElementById('identifier').addEventListener('input', function() {
                 fetch(`/check_account_type?login=${this.value}`)
                     .then(response => response.json())

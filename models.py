@@ -20,12 +20,24 @@ class User(UserMixin, db.Model):
     verification_code = db.Column(db.String(50))
     code_used = db.Column(db.Boolean, default=False)
 
+
+class UserProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True)
+    full_name = db.Column(db.String(150))
+    address = db.Column(db.String(250))
+    phone = db.Column(db.String(20))
+
+    user = db.relationship('User', backref=db.backref('profile', uselist=False))
+
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     description = db.Column(db.Text)
     price = db.Column(db.Float)
     image = db.Column(db.String(100))
+
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)

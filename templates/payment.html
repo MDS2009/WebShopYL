@@ -2,7 +2,7 @@
 {% block content %}
     <h1>Подтверждение платежа</h1>
     <div class="payment-warning">
-        <h3>Подтвердите платеж.</h3>  <!-- Добавлено сообщение -->
+        <h3>Подтвердите платеж.</h3>
         <p>Итого: ${{ order.total }}</p>
         <a href="{{ url_for('confirm_payment', order_id=order.id) }}" 
            class="btn btn-danger">

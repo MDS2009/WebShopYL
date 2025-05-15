@@ -79,13 +79,10 @@
 <script>
 document.querySelectorAll('.btn-quantity').forEach(button => {
     button.addEventListener('click', async (e) => {
-        // Исправлено: правильное определение кнопки
         const isPlus = e.currentTarget.classList.contains('plus');
         const input = e.currentTarget.closest('.quantity-control').querySelector('.quantity-input');
         const productId = input.dataset.productId;
         let quantity = parseInt(input.value);
-
-        // Изменяем количество
         quantity = isPlus ? quantity + 1 : Math.max(1, quantity - 1);
 
         try {
@@ -102,7 +99,6 @@ document.querySelectorAll('.btn-quantity').forEach(button => {
 
             const data = await response.json();
 
-            // Обновляем данные
             input.value = data.new_quantity;
             document.querySelector('.total-price').textContent = `$${data.total.toFixed(2)}`;
 

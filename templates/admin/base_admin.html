@@ -7,10 +7,32 @@
 </head>
 <body>
     <nav class="admin-nav">
-        <a href="{{ url_for('admin_products') }}"><i class="fas fa-box-open"></i> Товары</a> <!-- Исправлен URL -->
+        <a href="{{ url_for('admin_products') }}"><i class="fas fa-box-open"></i> Товары</a>
         <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Вернуться в магазин</a>
     </nav>
     <div class="admin-container">
+        {% block content %}
+        <div class="admin-toolbar">
+            <button class="admin-btn"><span class="icon">+</span> Добавить новый товар</button>
+            <button class="admin-btn"><span class="icon">&#128465;</span> Удалить все товары</button>
+            <button class="admin-btn"><span class="icon">&#128100;</span> Продавцы</button>
+        </div>
+
+        <div class="admin-products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                <div class="product-title">{{ product.name }}</div>
+                <div class="product-desc">{{ product.description }}</div>
+                <div class="product-price">${{ product.price }}</div>
+                <div class="admin-card-actions">
+                    <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="admin-card-btn">&#9998; Изменить</a>
+                    <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" class="admin-card-btn">&#128465; Удалить</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -18,7 +40,7 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
+        {% endblock %}
     </div>
 </body>
 </html>

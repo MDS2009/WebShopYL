@@ -2,13 +2,13 @@
 {% block content %}
     <div class="admin-header">
         <h1><i class="fas fa-edit"></i> Редактировать товар</h1>
-        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary"> <!-- Исправлен URL -->
+        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Назад
         </a>
     </div>
 
     <form method="POST" enctype="multipart/form-data" class="admin-form">
-        {{ form.hidden_tag() }} <!-- CSRF-токен добавлен -->
+        {{ form.hidden_tag() }}
         <div class="form-group">
             <label>Название товара</label>
             {{ form.name(class="form-control", value=product.name, required=True) }}

@@ -1,12 +1,9 @@
-import strip
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, FloatField, validators
+from wtforms import StringField, PasswordField, SubmitField, FloatField, validators, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
-from wtforms import TextAreaField, validators
-import re
-
 from models import User
+from wtforms.fields import SelectField
 
 
 class RegistrationForm(FlaskForm):
@@ -44,6 +41,35 @@ class LoginForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired()])
     submit = SubmitField('Войти')
 
+class ChangePasswordForm(FlaskForm):
+    old_password = PasswordField('Старый пароль', validators=[DataRequired()])
+    new_password = PasswordField('Новый пароль', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Подтвердите новый пароль', validators=[DataRequired(), EqualTo('new_password', message='Пароли должны совпадать')])
+    submit = SubmitField('Сменить пароль')
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Запросить сброс пароля')
+
+    def validate_email(self, field):
+        user = User.query.filter_by(email=field.data).first()
+        if user is None:
+            raise ValidationError('Нет аккаунта с таким email.')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Новый пароль', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Подтвердите пароль', 
+        validators=[DataRequired(), EqualTo('password', message='Пароли должны совпадать')])
+    submit = SubmitField('Сбросить пароль')
+
+
+class ProfileForm(FlaskForm):
+    full_name = StringField('Полное имя', validators=[DataRequired()])
+    address = StringField('Адрес', validators=[DataRequired()])
+    phone = StringField('Телефон', validators=[DataRequired()])
+    submit = SubmitField('Сохранить')
+
 class ProductForm(FlaskForm):
     name = StringField('Название', validators=[
         DataRequired(),
@@ -63,8 +89,28 @@ class ProductForm(FlaskForm):
     ])
     submit = SubmitField('Сохранить')
 
+
+
 class SearchForm(FlaskForm):
-    search = StringField('Поиск')
-    min_price = StringField('Возрастание цены')
-    max_price = StringField('Убывание цены')
-    submit = SubmitField('Фильтр')
+    search = StringField('Поиск по названию')
+    min_price = StringField('Минимальная цена')
+    max_price = StringField('Максимальная цена')
+    category = SelectField('Категория', choices=[
+        ('all', 'Все категории'),
+        ('cat', 'Кошки'),
+        ('dog', 'Собаки'),
+        ('bird', 'Птицы')
+    ])
+    brand = SelectField('Бренд', choices=[
+        ('all', 'Все бренды'),
+        ('purina', 'Purina'),
+        ('royal', 'Royal Canin'),
+        ('pedigree', 'Pedigree')
+    ])
+    sort_by = SelectField('Сортировка', choices=[
+        ('name_asc', 'По названию (А-Я)'),
+        ('name_desc', 'По названию (Я-А)'),
+        ('price_asc', 'Сначала дешевле'),
+        ('price_desc', 'Сначала дороже')
+    ])
+    submit = SubmitField('Применить')
