@@ -215,7 +215,6 @@ def admin_delete_product(id):
         flash(f'Ошибка удаления: {str(e)}', 'danger')
     return redirect(url_for('admin_products'))
 
-
 # Маршрут для админа
 @app.route('/admin/approve_sellers')
 @login_required

@@ -71,6 +71,8 @@ class ProfileForm(FlaskForm):
     submit = SubmitField('Сохранить')
 
 class ProductForm(FlaskForm):
+    class Meta:
+        csrf = False
     name = StringField('Название', validators=[
         DataRequired(),
         Length(min=2, max=100)

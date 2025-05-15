@@ -1,5 +1,4 @@
 from datetime import datetime
-import secrets
 from extensions import db
 from flask_login import UserMixin
 

@@ -13,9 +13,8 @@
     <div class="admin-container">
         {% block content %}
         <div class="admin-toolbar">
-            <button class="admin-btn"><span class="icon">+</span> Добавить новый товар</button>
-            <button class="admin-btn"><span class="icon">&#128465;</span> Удалить все товары</button>
-            <button class="admin-btn"><span class="icon">&#128100;</span> Продавцы</button>
+            <button class="admin-btn"><a href="{{ url_for('admin_add_product') }}"><i class="fas fa-plus"></i> Добавить новый товар</a></button>
+            <button class="admin-btn"><a href="{{ url_for('approve_sellers') }}"><i class="fas fa-user"></i> Одобрение продавцов</a></button>
         </div>
 
         <div class="admin-products-grid">
@@ -26,8 +25,10 @@
                 <div class="product-desc">{{ product.description }}</div>
                 <div class="product-price">${{ product.price }}</div>
                 <div class="admin-card-actions">
-                    <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="admin-card-btn">&#9998; Изменить</a>
-                    <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" class="admin-card-btn">&#128465; Удалить</a>
+                    <a href="{{ url_for('admin_edit_product', id=product.id) }}" class="admin-card-btn">&#9998; Изменить</a>
+                    <form action="{{ url_for('admin_delete_product', id=product.id) }}" method="post" style="display:inline;">
+    <button type="submit" class="admin-card-btn" onclick="return confirm('Удалить этот товар?');">&#128465; Удалить</button>
+</form>
                 </div>
             </div>
             {% endfor %}

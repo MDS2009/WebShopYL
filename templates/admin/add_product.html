@@ -7,6 +7,13 @@
         </a>
     </div>
 
+    {# Вывод ошибок формы #}
+    {% for field, errors in form.errors.items() %}
+      {% for error in errors %}
+        <div class="alert alert-danger">{{ form[field].label.text }}: {{ error }}</div>
+      {% endfor %}
+    {% endfor %}
+
     <form method="POST" enctype="multipart/form-data" class="admin-form">
         <div class="form-group">
             <label>Название товара</label>
